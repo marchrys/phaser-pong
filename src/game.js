@@ -23,6 +23,9 @@ const config = {
 const game = new Phaser.Game(config);
 let ball, player1, player2;
 let isGameStarted = false;
+let cursors;
+let paddleSpeed = 350;
+let keys = {};
 
 function preload(){
     this.load.image('ball', '../assets/images/ball.png');
@@ -44,6 +47,7 @@ function create(){
         'paddle'
     );
     player1.setImmovable(true);
+    player1.setCollideWorldBounds(true);
 
     player2 = this.physics.add.sprite(
         (ball.body.width / 2) + 1,
@@ -51,6 +55,11 @@ function create(){
         'paddle'
     );
     player2.setImmovable(true);
+    player2.setCollideWorldBounds(true);
+
+    cursors = this.input.keyboard.createCursorKeys();
+    keys.w = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+    keys.s = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
 
     this.physics.add.collider(ball, player1);
     this.physics.add.collider(ball, player2);
@@ -58,12 +67,42 @@ function create(){
 
 function update(){
     if(!isGameStarted){
-        const initialVelocityX = 100;
-        const initialVelocityY = 100;
+        const initialVelocityX = Phaser.Math.Between(100, 200);
+        const initialVelocityY = Phaser.Math.Between(100, 200);
 
         ball.setVelocityX(initialVelocityX);
         ball.setVelocityY(initialVelocityY);
 
         isGameStarted = true;
+    }
+
+    if(ball.body.x >= player1.body.x){
+        console.log('player2 wins !');
+    }
+    if(ball.body.x <= player2.body.x){
+        console.log('player1 wins !');
+    }
+
+    player1.body.setVelocityY(0);
+    player2.body.setVelocityY(0);
+    if(cursors.up.isDown){
+        player1.body.setVelocityY(-paddleSpeed);
+    }
+    if(cursors.down.isDown){
+        player1.body.setVelocityY(paddleSpeed);
+    } 
+
+    if(keys.s.isDown){
+        player2.body.setVelocityY(-paddleSpeed);
+    }
+    if(keys.w.isDown){
+        player2.body.setVelocityY(paddleSpeed);
+    } 
+
+    if(ball.body.velocity.y > paddleSpeed){
+        ball.body.setVelocityY(paddleSpeed);
+    }
+    if(ball.body.velocity.y < -paddleSpeed){
+        ball.body.setVelocityY(paddleSpeed);
     }
 }
